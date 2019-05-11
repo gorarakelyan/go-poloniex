@@ -118,6 +118,23 @@ func (b *Poloniex) GetOrderTrades(orderNumber int) (tradeOrderTransaction []Trad
 	return
 }
 
+// GetOrderStatus is used to get the given order status
+// orderNumber: order number.
+func (b *Poloniex) GetOrderStatus(orderNumber int) (orderStatus OrderStatus, err error) {
+	r, err := b.client.doCommand("returnOrderStatus", map[string]string{"orderNumber": fmt.Sprintf("%d", orderNumber)})
+	if err != nil {
+		return
+	}
+	if string(r) == `{"error":"Order not found, or you are not the person who placed it."}` {
+		err = fmt.Errorf("Error : order not found, or you are not the person who placed it.")
+		return
+	}
+	if err = json.Unmarshal(r, &orderStatus); err != nil {
+		return
+	}
+	return
+}
+
 // Returns candlestick chart data. Required GET parameters are "currencyPair",
 // "period" (candlestick period in seconds; valid values are 300, 900, 1800,
 // 7200, 14400, and 86400), "start", and "end". "Start" and "end" are given in
